@@ -1,12 +1,8 @@
-from flask import Flask
-from flask import request
+from flask import Flask, request
 import pickle
-import sklearn
 
 app = Flask(__name__)
 
-with open("sentiment_model.plk", "wb") as file:
-    loaded_data = pickle.load(file)
 
 @app.route("/")
 def health():
@@ -14,6 +10,20 @@ def health():
 
 @app.route("/api", methods=["POST", "GET"])
 def sentiment_api():
- 
-    data = request.get_json()
-    return {"sentence": "The sky looks great today!", "sentiment": "positive"}
+    # # Accept JSON POST with {"sentence": "..."}; fallback sample for GET
+    # if request.method == "POST":
+    #     payload = request.get_json(silent=True) or {}
+    #     sentence = payload.get("sentence")
+    #     if not sentence:
+    #         return {"error": "no sentence provided"}, 400
+    # else:
+    sentence = "The sky looks great today!"
+
+
+    # try:
+    #     pred = loaded_model.predict([sentence])
+    #     sentiment = pred[0]
+    # except Exception as e:
+    #     return {"error": str(e)}, 500
+
+    return {"sentence": sentence, "sentiment": str(sentiment)}
