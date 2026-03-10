@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def health():
-    return {"message": "Hello, World!"}
+    return {"message": "Hello, World again!"}
 
 @app.route("/api", methods=["POST", "GET"])
 def sentiment_api():
