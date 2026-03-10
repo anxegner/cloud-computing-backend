@@ -18,6 +18,7 @@ def sentiment_api():
     #         return {"error": "no sentence provided"}, 400
     # else:
     sentence = "The sky looks great today!"
+    sentiment = "positive"
 
 
     # try:

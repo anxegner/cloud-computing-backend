@@ -10,3 +10,4 @@ flask --app main run --debug
 
 ## with app.py
 just run py -m app.py
+localhost: 127.0.0.1:8080
