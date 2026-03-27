@@ -1,35 +1,3 @@
-# from flask import Flask, request
-# import pickle
-
-# app = Flask(__name__)
-
-
-# @app.route("/")
-# def health():
-#     return {"message": "Hello, World again!"}
-
-# @app.route("/api", methods=["POST", "GET"])
-# def sentiment_api():
-#     # # Accept JSON POST with {"sentence": "..."}; fallback sample for GET
-#     # if request.method == "POST":
-#     #     payload = request.get_json(silent=True) or {}
-#     #     sentence = payload.get("sentence")
-#     #     if not sentence:
-#     #         return {"error": "no sentence provided"}, 400
-#     # else:
-#     sentence = "The sky looks great today!"
-#     sentiment = "positive"
-
-
-#     # try:
-#     #     pred = loaded_model.predict([sentence])
-#     #     sentiment = pred[0]
-#     # except Exception as e:
-#     #     return {"error": str(e)}, 500
-
-#     return {"sentence": sentence, "sentiment": str(sentiment)}
-
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pickle
@@ -70,9 +38,17 @@ def sentiment_api():
     try:
         pred = loaded_model.predict([sentence])
         sentiment = pred[0]
+        
+        # Calculate confidence score if the model supports it
+        confidence = None
+        if hasattr(loaded_model, "predict_proba"):
+            proba = loaded_model.predict_proba([sentence])
+            confidence = float(proba.max())
+
         return jsonify({
             "sentence": sentence,
             "sentiment": str(sentiment),
+            "confidence": confidence,
             "status": "success"
         })
     except Exception as e:
