@@ -1,30 +1,83 @@
-from flask import Flask, request
+# from flask import Flask, request
+# import pickle
+
+# app = Flask(__name__)
+
+
+# @app.route("/")
+# def health():
+#     return {"message": "Hello, World again!"}
+
+# @app.route("/api", methods=["POST", "GET"])
+# def sentiment_api():
+#     # # Accept JSON POST with {"sentence": "..."}; fallback sample for GET
+#     # if request.method == "POST":
+#     #     payload = request.get_json(silent=True) or {}
+#     #     sentence = payload.get("sentence")
+#     #     if not sentence:
+#     #         return {"error": "no sentence provided"}, 400
+#     # else:
+#     sentence = "The sky looks great today!"
+#     sentiment = "positive"
+
+
+#     # try:
+#     #     pred = loaded_model.predict([sentence])
+#     #     sentiment = pred[0]
+#     # except Exception as e:
+#     #     return {"error": str(e)}, 500
+
+#     return {"sentence": sentence, "sentiment": str(sentiment)}
+
+
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 
 app = Flask(__name__)
+CORS(app) # Enable CORS for frontend integration
 
+# Load the trained model at startup
+try:
+    with open("sentiment_model.plk", "rb") as file:
+        loaded_model = pickle.load(file)
+except FileNotFoundError:
+    print("Error: sentiment_model.plk not found.")
+    loaded_model = None
+except Exception as e:
+    print(f"Error loading model: {e}")
+    loaded_model = None
 
 @app.route("/")
 def health():
-    return {"message": "Hello, World again!"}
+    return {"message": "Sentiment Analysis API is running", "model_loaded": loaded_model is not None}
 
 @app.route("/api", methods=["POST", "GET"])
 def sentiment_api():
-    # # Accept JSON POST with {"sentence": "..."}; fallback sample for GET
-    # if request.method == "POST":
-    #     payload = request.get_json(silent=True) or {}
-    #     sentence = payload.get("sentence")
-    #     if not sentence:
-    #         return {"error": "no sentence provided"}, 400
-    # else:
-    sentence = "The sky looks great today!"
-    sentiment = "positive"
+    if not loaded_model:
+        return jsonify({"error": "Model not loaded on server"}), 500
 
+    # Accept JSON POST with {"sentence": "..."}
+    if request.method == "POST":
+        payload = request.get_json(silent=True) or {}
+        sentence = payload.get("sentence")
+        if not sentence:
+            return jsonify({"error": "No sentence provided. Expected JSON: {\"sentence\": \"your text here\"}"}), 400
+    else:
+        # Fallback for GET request (testing/debugging)
+        sentence = request.args.get("sentence") or "The sky looks great today!"
 
-    # try:
-    #     pred = loaded_model.predict([sentence])
-    #     sentiment = pred[0]
-    # except Exception as e:
-    #     return {"error": str(e)}, 500
+    try:
+        pred = loaded_model.predict([sentence])
+        sentiment = pred[0]
+        return jsonify({
+            "sentence": sentence,
+            "sentiment": str(sentiment),
+            "status": "success"
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-    return {"sentence": sentence, "sentiment": str(sentiment)}
+if __name__ == "__main__":
+    # OpenShift uses port 8080 by default for non-root containers
+    app.run(host="0.0.0.0", port=8080)
