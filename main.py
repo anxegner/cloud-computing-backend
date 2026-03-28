@@ -7,7 +7,7 @@ CORS(app) # Enable CORS for frontend integration
 
 # Load the trained model at startup
 try:
-    with open("sentiment_model.plk", "rb") as file:
+    with open("model.plk", "rb") as file:
         loaded_model = pickle.load(file)
 except FileNotFoundError:
     print("Error: sentiment_model.plk not found.")
