@@ -5,7 +5,7 @@ import pickle
 app = Flask(__name__)
 CORS(app) # Enable CORS for frontend integration
 
-# Load the trained model at startup
+# Load the trained model
 try:
     with open("model.plk", "rb") as file:
         loaded_model = pickle.load(file)
@@ -36,10 +36,11 @@ def sentiment_api():
         sentence = request.args.get("sentence") or "The sky looks great today!"
 
     try:
+        # Predict sentiment
         pred = loaded_model.predict([sentence])
         sentiment = pred[0]
         
-        # Calculate confidence score if the model supports it
+        # Calculate confidence score
         confidence = None
         if hasattr(loaded_model, "predict_proba"):
             proba = loaded_model.predict_proba([sentence])
@@ -55,5 +56,4 @@ def sentiment_api():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    # OpenShift uses port 8080 by default for non-root containers
     app.run(host="0.0.0.0", port=8080)
