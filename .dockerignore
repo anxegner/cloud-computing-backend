@@ -1,0 +1,12 @@
+__pycache__/
+
+.venv/
+.git/
+.gitignore
+
+# Notebooks (not needed at runtime)
+*.ipynb
+
+# Build/output artifacts
+dist/
+build/
